@@ -24,6 +24,9 @@ import {
 import {
   Dialog,
   DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import {
   AlertDialog,
@@ -285,6 +288,12 @@ export function ProductTable({ menuItems: initialMenuItems, categories: initialC
 
       <Dialog open={isProductFormOpen} onOpenChange={setIsProductFormOpen}>
         <DialogContent className="sm:max-w-[725px]">
+          <DialogHeader>
+            <DialogTitle>{selectedProduct ? 'ویرایش محصول' : 'افزودن محصول جدید'}</DialogTitle>
+            <DialogDescription>
+              اطلاعات محصول را در اینجا وارد کنید.
+            </DialogDescription>
+          </DialogHeader>
           <ProductForm product={selectedProduct} categories={categories} onSuccess={handleSuccess} />
         </DialogContent>
       </Dialog>
