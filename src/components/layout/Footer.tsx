@@ -1,35 +1,23 @@
 import Link from 'next/link';
-import { UtensilsCrossed, Twitter, Instagram, Facebook } from 'lucide-react';
 
 export function Footer() {
   return (
-    <footer className="bg-background/30 backdrop-blur-xl border-t border-border/20 mt-16">
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex flex-col items-center justify-between gap-8 md:flex-row">
-          <div className="flex flex-col items-center md:items-start">
-            <Link href="/" className="mb-4 flex items-center gap-2">
-              <UtensilsCrossed className="h-6 w-6 text-primary" />
-              <span className="font-headline text-xl font-bold">طعم پارسی</span>
-            </Link>
-            <p className="text-center text-sm text-muted-foreground md:text-right">
-              تجربه ای بی نظیر از طعم های اصیل ایرانی.
-            </p>
-          </div>
-          <div className="flex items-center gap-4">
-            <Link href="#" aria-label="Twitter">
-              <Twitter className="h-6 w-6 text-muted-foreground transition-colors hover:text-primary" />
-            </Link>
-            <Link href="#" aria-label="Instagram">
-              <Instagram className="h-6 w-6 text-muted-foreground transition-colors hover:text-primary" />
-            </Link>
-            <Link href="#" aria-label="Facebook">
-              <Facebook className="h-6 w-6 text-muted-foreground transition-colors hover:text-primary" />
-            </Link>
-          </div>
-        </div>
-        <div className="mt-8 border-t border-border/20 pt-4 text-center text-sm text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} کافه رستوران طعم پارسی. تمامی حقوق محفوظ است.</p>
-        </div>
+    <footer className="border-t">
+      <div className="container mx-auto flex flex-col items-center justify-between gap-4 px-4 py-6 md:flex-row md:px-6">
+        <p className="text-sm text-muted-foreground">
+          &copy; {new Date().getFullYear()} کافه رستوران طعم پارسی. تمامی حقوق محفوظ است.
+        </p>
+        <nav className="flex gap-4 sm:gap-6">
+          <Link href="/about" className="text-sm hover:underline underline-offset-4">
+            درباره ما
+          </Link>
+          <Link href="/contact" className="text-sm hover:underline underline-offset-4">
+            تماس با ما
+          </Link>
+          <Link href="/dashboard/login" className="text-sm hover:underline underline-offset-4">
+            ورود مدیر
+          </Link>
+        </nav>
       </div>
     </footer>
   );

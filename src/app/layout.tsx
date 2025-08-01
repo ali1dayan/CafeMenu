@@ -25,13 +25,13 @@ export default function RootLayout({
           crossOrigin="anonymous"
         />
         <link
-          href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700;900&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&display=swap"
           rel="stylesheet"
         />
       </head>
       <body className="font-body antialiased">
-        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
-            <div className="relative z-10 flex min-h-screen flex-col">
+        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+            <div className="relative flex min-h-screen flex-col">
                 <Header />
                 <main className="flex-grow">{children}</main>
                 <Footer />
