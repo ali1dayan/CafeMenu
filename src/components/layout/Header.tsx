@@ -15,6 +15,7 @@ const navLinks = [
   { href: '/about', label: 'درباره ما' },
   { href: '/contact', label: 'تماس با ما' },
   { href: '/reservation', label: 'رزرو' },
+  { href: '/dashboard', label: 'داشبورد' },
 ];
 
 export function Header() {

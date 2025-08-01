@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { menuItems, categories } from '@/lib/data';
 import type { Category } from '@/lib/types';
 import { Search } from 'lucide-react';
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 
 export default function MenuPage() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -42,8 +43,8 @@ export default function MenuPage() {
         </p>
       </div>
 
-      <div className="my-12 flex flex-col items-center gap-4 md:flex-row">
-        <div className="relative w-full md:w-1/3">
+      <div className="my-12 flex flex-col items-center gap-8">
+        <div className="relative w-full max-w-md">
           <Input
             type="text"
             placeholder="جستجوی غذا..."
@@ -53,23 +54,39 @@ export default function MenuPage() {
           />
           <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
         </div>
-        <div className="flex flex-wrap justify-center gap-2">
-          <Button
-            variant={selectedCategory === 'all' ? 'default' : 'outline'}
-            onClick={() => setSelectedCategory('all')}
-          >
-            همه
-          </Button>
-          {categories.map(cat => (
-            <Button
-              key={cat.id}
-              variant={selectedCategory === cat.id ? 'default' : 'outline'}
-              onClick={() => setSelectedCategory(cat.id)}
-            >
-              {cat.name}
-            </Button>
-          ))}
-        </div>
+        <Carousel
+          opts={{
+            align: "center",
+            rtl: true,
+            dragFree: true,
+          }}
+          className="w-full max-w-xs sm:max-w-sm md:max-w-lg lg:max-w-2xl"
+        >
+          <CarouselContent>
+            <CarouselItem className="basis-auto">
+              <Button
+                variant={selectedCategory === 'all' ? 'default' : 'outline'}
+                onClick={() => setSelectedCategory('all')}
+                className="w-full"
+              >
+                همه
+              </Button>
+            </CarouselItem>
+            {categories.map(cat => (
+              <CarouselItem key={cat.id} className="basis-auto">
+                <Button
+                  variant={selectedCategory === cat.id ? 'default' : 'outline'}
+                  onClick={() => setSelectedCategory(cat.id)}
+                  className="w-full"
+                >
+                  {cat.name}
+                </Button>
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+          <CarouselPrevious className="hidden md:flex" />
+          <CarouselNext className="hidden md:flex" />
+        </Carousel>
       </div>
 
       <div className="space-y-16">
