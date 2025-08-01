@@ -11,6 +11,10 @@ export async function authenticate(
 ) {
   try {
     await signIn("credentials", formData);
+    // NextAuth throws a 'CallbackRouteError' on successful sign in.
+    // We can't handle it here, so we'll let the middleware handle the redirect.
+    // If signIn doesn't throw, we redirect manually, just in case.
+    redirect("/dashboard");
   } catch (error) {
     if (error instanceof AuthError) {
       switch (error.type) {
@@ -18,18 +22,15 @@ export async function authenticate(
           return "نام کاربری یا گذرواژه نامعتبر است.";
         case "CallbackRouteError":
             // This can happen on successful login. NextAuth.js throws this error
-            // and then redirects. We can safely ignore it, but we need to redirect
-            // manually in the happy path.
-            break;
+            // and then redirects. We can catch this and redirect explicitly.
+            redirect("/dashboard");
         default:
           return "خطایی رخ داده است. لطفا دوباره تلاش کنید.";
       }
     }
-    // Re-throw other errors
+    // Re-throw other errors for debugging
     throw error;
   }
-  // This will only be reached on successful login.
-  redirect("/dashboard");
 }
 
 export async function logout() {

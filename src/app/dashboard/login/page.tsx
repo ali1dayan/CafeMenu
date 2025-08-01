@@ -1,6 +1,7 @@
 "use client";
 
-import { useFormState, useFormStatus } from "react-dom";
+import { useActionState } from "react";
+import { useFormStatus } from "react-dom";
 import { authenticate } from "@/app/dashboard/_actions/auth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,7 +11,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 
 export default function LoginPage() {
-  const [errorMessage, dispatch] = useFormState(authenticate, undefined);
+  const [errorMessage, dispatch, isPending] = useActionState(authenticate, undefined);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background">
@@ -45,7 +46,7 @@ export default function LoginPage() {
                 <AlertDescription>{errorMessage}</AlertDescription>
               </Alert>
             )}
-            <LoginButton />
+            <LoginButton isPending={isPending}/>
           </form>
         </CardContent>
       </Card>
@@ -53,12 +54,13 @@ export default function LoginPage() {
   );
 }
 
-function LoginButton() {
+function LoginButton({ isPending }: { isPending: boolean }) {
   const { pending } = useFormStatus();
+  const loading = isPending || pending;
 
   return (
-    <Button type="submit" className="w-full" aria-disabled={pending}>
-      {pending ? "در حال ورود..." : "ورود"}
+    <Button type="submit" className="w-full" aria-disabled={loading}>
+      {loading ? "در حال ورود..." : "ورود"}
     </Button>
   );
 }

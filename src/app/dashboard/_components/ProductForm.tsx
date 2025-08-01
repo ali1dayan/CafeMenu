@@ -1,7 +1,7 @@
 "use client";
 
-import { useFormState, useFormStatus } from "react-dom";
-import { useEffect, useState, useRef } from "react";
+import { useActionState, useEffect, useState, useRef } from "react";
+import { useFormStatus } from "react-dom";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,14 +28,25 @@ type ProductFormProps = {
   onSuccess: () => void;
 };
 
+type FormState = {
+  errors?: {
+    name?: string[];
+    description?: string[];
+    price?: string[];
+    category?: string[];
+  };
+  message?: string;
+  success?: boolean;
+} | undefined;
+
 export function ProductForm({ product, categories, onSuccess }: ProductFormProps) {
-  const [formState, action] = useFormState(saveProduct, {});
+  const [formState, action] = useActionState<FormState, FormData>(saveProduct, undefined);
   const [imagePreview, setImagePreview] = useState<string | null>(product?.image || null);
   const formRef = useRef<HTMLFormElement>(null);
 
 
   useEffect(() => {
-    if (formState.success) {
+    if (formState?.success) {
       onSuccess();
     }
   }, [formState, onSuccess]);
@@ -59,8 +70,8 @@ export function ProductForm({ product, categories, onSuccess }: ProductFormProps
           <CardTitle>{product ? "ویرایش محصول" : "افزودن محصول جدید"}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <input type="hidden" name="id" value={product?.id} />
-          <input type="hidden" name="image" value={product?.image} />
+          <input type="hidden" name="id" value={product?.id || ''} />
+          <input type="hidden" name="image" value={product?.image || ''} />
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="md:col-span-1 space-y-2">
@@ -88,12 +99,12 @@ export function ProductForm({ product, categories, onSuccess }: ProductFormProps
                 <div className="space-y-2">
                     <Label htmlFor="name">نام محصول</Label>
                     <Input id="name" name="name" defaultValue={product?.name} />
-                    {formState.errors?.name && <FormError message={formState.errors.name[0]} />}
+                    {formState?.errors?.name && <FormError message={formState.errors.name[0]} />}
                 </div>
                 <div className="space-y-2">
                     <Label htmlFor="description">توضیحات</Label>
                     <Textarea id="description" name="description" defaultValue={product?.description} />
-                    {formState.errors?.description && <FormError message={formState.errors.description[0]} />}
+                    {formState?.errors?.description && <FormError message={formState.errors.description[0]} />}
                 </div>
             </div>
           </div>
@@ -103,7 +114,7 @@ export function ProductForm({ product, categories, onSuccess }: ProductFormProps
             <div className="space-y-2">
                 <Label htmlFor="price">قیمت (تومان)</Label>
                 <Input id="price" name="price" type="number" defaultValue={product?.price} />
-                {formState.errors?.price && <FormError message={formState.errors.price[0]} />}
+                {formState?.errors?.price && <FormError message={formState.errors.price[0]} />}
             </div>
             <div className="space-y-2">
                 <Label htmlFor="category">دسته‌بندی</Label>
@@ -119,12 +130,12 @@ export function ProductForm({ product, categories, onSuccess }: ProductFormProps
                         ))}
                     </SelectContent>
                 </Select>
-                 {formState.errors?.category && <FormError message={formState.errors.category[0]} />}
+                 {formState?.errors?.category && <FormError message={formState.errors.category[0]} />}
             </div>
           </div>
            <div className="space-y-2">
             <Label htmlFor="aiHint">راهنمای هوش مصنوعی (اختیاری)</Label>
-            <Input id="aiHint" name="aiHint" defaultValue={product?.aiHint} placeholder="مثال: kebab platter"/>
+            <Input id="aiHint" name="aiHint" defaultValue={product?.aiHint || ''} placeholder="مثال: kebab platter"/>
             <p className="text-xs text-muted-foreground">یک یا دو کلمه انگلیسی برای کمک به پیدا کردن تصویر مناسب توسط هوش مصنوعی.</p>
           </div>
 
@@ -133,7 +144,7 @@ export function ProductForm({ product, categories, onSuccess }: ProductFormProps
             <Label htmlFor="featured">محصول ویژه</Label>
           </div>
 
-          {formState.message && (
+          {formState?.message && (
              <Alert variant="destructive">
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription>{formState.message}</AlertDescription>
