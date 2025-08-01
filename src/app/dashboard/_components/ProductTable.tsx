@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useActionState, useState } from "react";
 import { PlusCircle, MoreHorizontal, Pencil, Trash2, FilePlus, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -42,28 +42,78 @@ import {
 import Image from "next/image";
 
 import { ProductForm } from "./ProductForm";
-import { deleteProduct } from "../_actions/products";
+import { addCategory, deleteProduct } from "../_actions/products";
 import { useToast } from "@/hooks/use-toast";
 import type { MenuItem } from "@/lib/types";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 type ProductTableProps = {
   menuItems: MenuItem[];
   categories: { id: string; name: string }[];
+  onDataChange: () => void;
 };
 
-export function ProductTable({ menuItems, categories }: ProductTableProps) {
-  const [isFormOpen, setIsFormOpen] = useState(false);
+type CategoryFormState = {
+  errors?: {
+    id?: string[];
+    name?: string[];
+  };
+  success?: boolean;
+} | undefined;
+
+function AddCategoryForm({ onSuccess }: { onSuccess: () => void }) {
+  const [formState, action] = useActionState<CategoryFormState, FormData>(addCategory, undefined);
+  
+  if (formState?.success) {
+    onSuccess();
+  }
+
+  return (
+      <form action={action}>
+        <DialogHeader>
+            <DialogTitle>افزودن دسته‌بندی جدید</DialogTitle>
+            <DialogDescription>
+                یک دسته‌بندی جدید برای محصولات خود ایجاد کنید.
+            </DialogDescription>
+        </DialogHeader>
+        <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="name" className="text-right">نام دسته‌بندی</Label>
+                <Input id="name" name="name" className="col-span-3" />
+                {formState?.errors?.name && <p className="col-span-4 text-sm font-medium text-destructive">{formState.errors.name[0]}</p>}
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="id" className="text-right">آی‌دی انگلیسی</Label>
+                <Input id="id" name="id" placeholder="e.g. new-drinks" className="col-span-3" />
+                {formState?.errors?.id && <p className="col-span-4 text-sm font-medium text-destructive">{formState.errors.id[0]}</p>}
+            </div>
+        </div>
+        <DialogFooter>
+            <Button type="submit">افزودن</Button>
+        </DialogFooter>
+    </form>
+  )
+}
+
+export function ProductTable({ menuItems, categories, onDataChange }: ProductTableProps) {
+  const [isProductFormOpen, setIsProductFormOpen] = useState(false);
+  const [isCategoryFormOpen, setIsCategoryFormOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<MenuItem | null>(null);
   const { toast } = useToast();
 
   const handleAddProduct = () => {
     setSelectedProduct(null);
-    setIsFormOpen(true);
+    setIsProductFormOpen(true);
+  };
+  
+  const handleAddCategory = () => {
+    setIsCategoryFormOpen(true);
   };
 
   const handleEditProduct = (product: MenuItem) => {
     setSelectedProduct(product);
-    setIsFormOpen(true);
+    setIsProductFormOpen(true);
   };
 
   const handleDeleteProduct = async (id: number) => {
@@ -73,6 +123,7 @@ export function ProductTable({ menuItems, categories }: ProductTableProps) {
         title: "موفق",
         description: "محصول با موفقیت حذف شد.",
       });
+      onDataChange();
     } else {
       toast({
         variant: "destructive",
@@ -82,14 +133,24 @@ export function ProductTable({ menuItems, categories }: ProductTableProps) {
     }
   };
   
-  const handleFormSuccess = () => {
-    setIsFormOpen(false);
+  const handleProductFormSuccess = () => {
+    setIsProductFormOpen(false);
     setSelectedProduct(null);
     toast({
         title: "موفق",
-        description: "عملیات با موفقیت انجام شد.",
+        description: "عملیات محصول با موفقیت انجام شد.",
       });
+    onDataChange();
   };
+
+  const handleCategoryFormSuccess = () => {
+    setIsCategoryFormOpen(false);
+     toast({
+        title: "موفق",
+        description: "دسته‌بندی جدید اضافه شد.",
+      });
+    onDataChange();
+  }
 
   return (
     <>
@@ -101,6 +162,10 @@ export function ProductTable({ menuItems, categories }: ProductTableProps) {
           </p>
         </div>
         <div className="flex gap-2">
+          <Button onClick={handleAddCategory} variant="outline">
+            <FilePlus className="me-2 h-4 w-4" />
+            افزودن دسته‌بندی
+          </Button>
           <Button onClick={handleAddProduct}>
             <PlusCircle className="me-2 h-4 w-4" />
             افزودن محصول
@@ -165,10 +230,10 @@ export function ProductTable({ menuItems, categories }: ProductTableProps) {
                         <DropdownMenuSeparator />
                          <AlertDialog>
                             <AlertDialogTrigger asChild>
-                               <Button variant="ghost" className="w-full justify-start text-destructive hover:text-destructive relative flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent data-[disabled]:pointer-events-none data-[disabled]:opacity-50">
+                               <div className="relative flex cursor-pointer select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm text-destructive outline-none transition-colors hover:bg-accent focus:bg-accent data-[disabled]:pointer-events-none data-[disabled]:opacity-50">
                                 <Trash2 className="ms-2 h-4 w-4" />
                                 حذف
-                               </Button>
+                               </div>
                             </AlertDialogTrigger>
                             <AlertDialogContent>
                                 <AlertDialogHeader>
@@ -195,10 +260,16 @@ export function ProductTable({ menuItems, categories }: ProductTableProps) {
         </CardContent>
       </Card>
 
-      <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+      <Dialog open={isProductFormOpen} onOpenChange={setIsProductFormOpen}>
         <DialogContent className="sm:max-w-[725px]">
-            <ProductForm product={selectedProduct} categories={categories} onSuccess={handleFormSuccess} />
+            <ProductForm product={selectedProduct} categories={categories} onSuccess={handleProductFormSuccess} />
         </DialogContent>
+      </Dialog>
+
+      <Dialog open={isCategoryFormOpen} onOpenChange={setIsCategoryFormOpen}>
+          <DialogContent className="sm:max-w-[425px]">
+              <AddCategoryForm onSuccess={handleCategoryFormSuccess} />
+          </DialogContent>
       </Dialog>
     </>
   );

@@ -24,7 +24,7 @@ const productSchema = z.object({
   name: z.string().min(1, "نام محصول الزامی است"),
   description: z.string().min(1, "توضیحات الزامی است"),
   price: z.coerce.number().min(0, "قیمت نمی‌تواند منفی باشد"),
-  category: z.enum(["hot-drinks", "cold-drinks", "meals", "desserts"]),
+  category: z.string().min(1, "انتخاب دسته‌بندی الزامی است"),
   featured: z.preprocess((val) => val === 'on', z.boolean()),
   image: z.string().optional(),
   aiHint: z.string().optional(),
@@ -56,16 +56,22 @@ export async function saveProduct(prevState: unknown, formData: FormData) {
       imageUrl = `data:${imageFile.type};base64,${base64}`;
   }
 
+  const productData = {
+    ...data,
+    image: imageUrl,
+    // Ensure category is of the correct type, not just string
+    category: data.category as 'hot-drinks' | 'cold-drinks' | 'meals' | 'desserts'
+  };
 
   if (id) {
     // Update existing product
     const index = menuItems.findIndex((item) => item.id === id);
     if (index !== -1) {
-      menuItems[index] = { ...menuItems[index], ...data, image: imageUrl, id };
+      menuItems[index] = { ...menuItems[index], ...productData, id };
     }
   } else {
     // Add new product
-    const newProduct: MenuItem = { ...data, image: imageUrl, id: nextId++ };
+    const newProduct: MenuItem = { ...productData, id: nextId++ };
     menuItems.push(newProduct);
   }
 
@@ -86,4 +92,35 @@ export async function deleteProduct(id: number) {
         return { success: true };
     }
     return { success: false, message: "محصول یافت نشد" };
+}
+
+const categorySchema = z.object({
+  id: z.string().min(1, "آی‌دی دسته‌بندی الزامی است").regex(/^[a-z-]+$/, "آی‌دی فقط می‌تواند شامل حروف کوچک انگلیسی و خط تیره باشد"),
+  name: z.string().min(1, "نام دسته‌بندی الزامی است"),
+});
+
+export async function addCategory(prevState: unknown, formData: FormData) {
+  const validatedFields = categorySchema.safeParse(
+    Object.fromEntries(formData.entries())
+  );
+
+  if (!validatedFields.success) {
+    return {
+      errors: validatedFields.error.flatten().fieldErrors,
+    };
+  }
+
+  const newCategory = validatedFields.data;
+
+  if (categories.some(cat => cat.id === newCategory.id)) {
+    return {
+      errors: { id: ["این آی‌دی قبلا استفاده شده است."] }
+    }
+  }
+
+  categories.push(newCategory as { id: 'hot-drinks' | 'cold-drinks' | 'meals' | 'desserts'; name: string });
+
+  revalidatePath("/dashboard");
+  revalidatePath("/menu");
+  return { success: true };
 }
