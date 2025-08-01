@@ -1,7 +1,6 @@
-
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useState, useEffect } from "react";
 import { PlusCircle, MoreHorizontal, Pencil, Trash2, FilePlus, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
@@ -60,6 +59,11 @@ export function ProductTable({ menuItems: initialMenuItems, categories: initialC
 
   const [menuItems, setMenuItems] = useState(initialMenuItems);
   const [categories, setCategories] = useState(initialCategories);
+
+  useEffect(() => {
+    setMenuItems(initialMenuItems);
+    setCategories(initialCategories);
+  }, [initialMenuItems, initialCategories]);
 
 
   const handleAddProduct = () => {
@@ -134,7 +138,7 @@ export function ProductTable({ menuItems: initialMenuItems, categories: initialC
 
   return (
     <>
-      <div className="mb-8 flex items-center justify-between">
+      <div className="flex items-center justify-between gap-4 mb-8">
         <div>
           <h1 className="text-3xl font-bold">داشبورد</h1>
           <p className="text-muted-foreground">
