@@ -25,7 +25,7 @@ export default async function Home() {
               <Link href="/menu">مشاهده منو</Link>
             </Button>
             <Button asChild size="lg" variant="secondary">
-              <Link href="/reservation">رزرو میز</Link>
+              <Link href="/contact">تماس با ما</Link>
             </Button>
           </div>
         </div>
