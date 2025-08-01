@@ -11,7 +11,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 
 export default function LoginPage() {
-  const [errorMessage, dispatch, isPending] = useActionState(authenticate, undefined);
+  const [errorMessage, dispatch] = useActionState(authenticate, undefined);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background">
@@ -46,7 +46,7 @@ export default function LoginPage() {
                 <AlertDescription>{errorMessage}</AlertDescription>
               </Alert>
             )}
-            <LoginButton isPending={isPending}/>
+            <LoginButton />
           </form>
         </CardContent>
       </Card>
@@ -54,13 +54,12 @@ export default function LoginPage() {
   );
 }
 
-function LoginButton({ isPending }: { isPending: boolean }) {
+function LoginButton() {
   const { pending } = useFormStatus();
-  const loading = isPending || pending;
 
   return (
-    <Button type="submit" className="w-full" aria-disabled={loading}>
-      {loading ? "در حال ورود..." : "ورود"}
+    <Button type="submit" className="w-full" aria-disabled={pending}>
+      {pending ? "در حال ورود..." : "ورود"}
     </Button>
   );
 }
