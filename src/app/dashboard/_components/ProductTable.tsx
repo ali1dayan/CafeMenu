@@ -1,0 +1,205 @@
+"use client";
+
+import { useState } from "react";
+import { PlusCircle, MoreHorizontal, Pencil, Trash2, FilePlus, AlertTriangle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import Image from "next/image";
+
+import { ProductForm } from "./ProductForm";
+import { deleteProduct } from "../_actions/products";
+import { useToast } from "@/hooks/use-toast";
+import type { MenuItem } from "@/lib/types";
+
+type ProductTableProps = {
+  menuItems: MenuItem[];
+  categories: { id: string; name: string }[];
+};
+
+export function ProductTable({ menuItems, categories }: ProductTableProps) {
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<MenuItem | null>(null);
+  const { toast } = useToast();
+
+  const handleAddProduct = () => {
+    setSelectedProduct(null);
+    setIsFormOpen(true);
+  };
+
+  const handleEditProduct = (product: MenuItem) => {
+    setSelectedProduct(product);
+    setIsFormOpen(true);
+  };
+
+  const handleDeleteProduct = async (id: number) => {
+    const result = await deleteProduct(id);
+    if (result.success) {
+      toast({
+        title: "موفق",
+        description: "محصول با موفقیت حذف شد.",
+      });
+    } else {
+      toast({
+        variant: "destructive",
+        title: "خطا",
+        description: result.message || "خطا در حذف محصول.",
+      });
+    }
+  };
+  
+  const handleFormSuccess = () => {
+    setIsFormOpen(false);
+    setSelectedProduct(null);
+    toast({
+        title: "موفق",
+        description: "عملیات با موفقیت انجام شد.",
+      });
+  };
+
+  return (
+    <>
+      <div className="mb-8 flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold">داشبورد محصولات</h1>
+          <p className="text-muted-foreground">
+            مدیریت محصولات و دسته‌بندی‌ها
+          </p>
+        </div>
+        <div className="flex gap-2">
+          <Button onClick={handleAddProduct}>
+            <PlusCircle className="me-2 h-4 w-4" />
+            افزودن محصول
+          </Button>
+        </div>
+      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>محصولات</CardTitle>
+          <CardDescription>
+            در اینجا می‌توانید لیست محصولات خود را مشاهده و مدیریت کنید.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="hidden w-[100px] sm:table-cell">
+                  <span className="sr-only">تصویر</span>
+                </TableHead>
+                <TableHead>نام محصول</TableHead>
+                <TableHead>دسته‌بندی</TableHead>
+                <TableHead>قیمت</TableHead>
+                <TableHead>ویژه</TableHead>
+                <TableHead>
+                  <span className="sr-only">عملیات</span>
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {menuItems.map((item) => (
+                <TableRow key={item.id}>
+                  <TableCell className="hidden sm:table-cell">
+                    <Image
+                      alt={item.name}
+                      className="aspect-square rounded-md object-cover"
+                      height="64"
+                      src={item.image || "https://placehold.co/64x64.png"}
+                      width="64"
+                    />
+                  </TableCell>
+                  <TableCell className="font-medium">{item.name}</TableCell>
+                  <TableCell>
+                    {categories.find((c) => c.id === item.category)?.name}
+                  </TableCell>
+                  <TableCell>{item.price.toLocaleString("fa-IR")} تومان</TableCell>
+                  <TableCell>{item.featured ? "بله" : "خیر"}</TableCell>
+                  <TableCell>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button aria-haspopup="true" size="icon" variant="ghost">
+                          <MoreHorizontal className="h-4 w-4" />
+                          <span className="sr-only">Toggle menu</span>
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuLabel>عملیات</DropdownMenuLabel>
+                        <DropdownMenuItem onClick={() => handleEditProduct(item)}>
+                          <Pencil className="ms-2 h-4 w-4" />
+                          ویرایش
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                         <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                               <Button variant="ghost" className="w-full justify-start text-destructive hover:text-destructive relative flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent data-[disabled]:pointer-events-none data-[disabled]:opacity-50">
+                                <Trash2 className="ms-2 h-4 w-4" />
+                                حذف
+                               </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>آیا مطمئن هستید؟</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                    این عمل قابل بازگشت نیست. این محصول برای همیشه حذف خواهد شد.
+                                    </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel>انصراف</AlertDialogCancel>
+                                    <AlertDialogAction onClick={() => handleDeleteProduct(item.id)}>
+                                    بله، حذف کن
+                                    </AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+
+      <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+        <DialogContent className="sm:max-w-[725px]">
+            <ProductForm product={selectedProduct} categories={categories} onSuccess={handleFormSuccess} />
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}

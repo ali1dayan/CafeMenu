@@ -1,13 +1,13 @@
 import { type MenuItem, type Category } from './types';
 
-export const categories: { id: Category; name: string }[] = [
+export let categories: { id: Category; name: string }[] = [
   { id: 'hot-drinks', name: 'نوشیدنی‌های گرم' },
   { id: 'cold-drinks', name: 'نوشیدنی‌های سرد' },
   { id: 'meals', name: 'غذاها' },
   { id: 'desserts', name: 'دسرها' },
 ];
 
-export const menuItems: MenuItem[] = [
+export let menuItems: MenuItem[] = [
   {
     id: 1,
     name: 'کباب کوبیده',
