@@ -4,6 +4,7 @@ import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { Toaster } from '@/components/ui/toaster';
 import './globals.css';
+import { cn } from '@/lib/utils';
 
 export const metadata: Metadata = {
   title: 'کافه رستوران طعم پارسی',
@@ -29,7 +30,7 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="font-body antialiased">
+      <body className={cn("font-body antialiased bg-grid-light dark:bg-grid-dark")}>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
             <div className="relative flex min-h-screen flex-col">
                 <Header />

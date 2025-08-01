@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Menu, Utensils } from 'lucide-react';
+import { ThemeToggle } from '../theme-toggle';
 
 const navLinks = [
   { href: '/', label: 'صفحه اصلی' },
@@ -36,36 +37,39 @@ export function Header() {
             </Link>
           ))}
         </nav>
-        <div className="md:hidden">
-            <Sheet>
-                <SheetTrigger asChild>
-                    <Button variant="outline" size="icon">
-                        <Menu className="h-6 w-6" />
-                        <span className="sr-only">باز کردن منو</span>
-                    </Button>
-                </SheetTrigger>
-                <SheetContent side="right">
-                    <div className="grid gap-4 py-6">
-                        <Link href="/" className="flex items-center gap-2 font-bold">
-                            <Utensils className="h-6 w-6" />
-                            <span>طعم پارسی</span>
-                        </Link>
-                        <nav className="grid gap-2">
-                         {navLinks.map((link) => (
-                            <Link
-                                key={link.href}
-                                href={link.href}
-                                className={`flex w-full items-center py-2 text-lg font-semibold ${
-                                    pathname === link.href ? 'text-primary' : ''
-                                }`}
-                            >
-                                {link.label}
+        <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <div className="md:hidden">
+                <Sheet>
+                    <SheetTrigger asChild>
+                        <Button variant="outline" size="icon">
+                            <Menu className="h-6 w-6" />
+                            <span className="sr-only">باز کردن منو</span>
+                        </Button>
+                    </SheetTrigger>
+                    <SheetContent side="right">
+                        <div className="grid gap-4 py-6">
+                            <Link href="/" className="flex items-center gap-2 font-bold">
+                                <Utensils className="h-6 w-6" />
+                                <span>طعم پارسی</span>
                             </Link>
-                         ))}
-                        </nav>
-                    </div>
-                </SheetContent>
-            </Sheet>
+                            <nav className="grid gap-2">
+                            {navLinks.map((link) => (
+                                <Link
+                                    key={link.href}
+                                    href={link.href}
+                                    className={`flex w-full items-center py-2 text-lg font-semibold ${
+                                        pathname === link.href ? 'text-primary' : ''
+                                    }`}
+                                >
+                                    {link.label}
+                                </Link>
+                            ))}
+                            </nav>
+                        </div>
+                    </SheetContent>
+                </Sheet>
+            </div>
         </div>
       </div>
     </header>

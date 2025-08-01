@@ -15,7 +15,7 @@ export default async function Home() {
     <div className="flex flex-col min-h-screen">
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="w-full py-20 md:py-32 lg:py-40 bg-grid">
+        <section className="w-full py-20 md:py-32 lg:py-40">
           <div className="container mx-auto px-4 md:px-6">
             <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 xl:gap-16 items-center">
               <div className="space-y-4">
@@ -38,7 +38,7 @@ export default async function Home() {
                 alt="غذای اصلی"
                 width={600}
                 height={400}
-                className="mx-auto aspect-video overflow-hidden rounded-xl object-cover object-center sm:w-full"
+                className="mx-auto aspect-video overflow-hidden rounded-xl object-cover object-center sm:w-full glassmorphism"
                 data-ai-hint="persian food plate"
               />
             </div>
@@ -57,7 +57,7 @@ export default async function Home() {
             </div>
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:gap-8">
               {featuredItems.map((item) => (
-                <Card key={item.id} className="overflow-hidden">
+                <Card key={item.id} className="overflow-hidden glassmorphism">
                   <Image
                     src={item.image}
                     alt={item.name}
@@ -91,7 +91,7 @@ export default async function Home() {
         </section>
 
         {/* Why Choose Us Section */}
-        <section className="w-full py-12 md:py-24 lg:py-32 bg-muted">
+        <section className="w-full py-12 md:py-24 lg:py-32 bg-muted/50">
             <div className="container mx-auto grid items-center justify-center gap-4 px-4 text-center md:px-6">
                 <div className="space-y-3">
                 <h2 className="text-3xl font-bold tracking-tighter md:text-4xl/tight font-headline">چرا ما را انتخاب کنید؟</h2>
