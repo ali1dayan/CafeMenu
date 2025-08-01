@@ -1,11 +1,13 @@
+
 import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { menuItems } from '@/lib/data';
+import { getMenuItems } from '@/app/dashboard/_actions/products';
 import { ArrowLeft } from 'lucide-react';
 
-export default function Home() {
+export default async function Home() {
+  const menuItems = await getMenuItems();
   const featuredItems = menuItems.filter(item => item.featured);
 
   return (

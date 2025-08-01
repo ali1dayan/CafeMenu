@@ -1,9 +1,10 @@
+
 "use client";
 
 import { useActionState, useState } from "react";
 import { PlusCircle, MoreHorizontal, Pencil, Trash2, FilePlus, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardActions } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -23,8 +24,6 @@ import {
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
-  DialogTitle,
 } from "@/components/ui/dialog";
 import {
   AlertDialog,
@@ -41,7 +40,7 @@ import Image from "next/image";
 
 import { ProductForm } from "./ProductForm";
 import { CategoryForm } from "./CategoryForm";
-import { deleteProduct, deleteCategory } from "../_actions/products";
+import { deleteProduct, deleteCategory, getCategories, getMenuItems } from "../_actions/products";
 import { useToast } from "@/hooks/use-toast";
 import type { MenuItem } from "@/lib/types";
 
@@ -56,7 +55,6 @@ export function ProductTable({ menuItems: initialMenuItems, categories: initialC
   const [selectedProduct, setSelectedProduct] = useState<MenuItem | null>(null);
   const { toast } = useToast();
 
-  // We use state for menuItems and categories to allow for client-side updates after actions
   const [menuItems, setMenuItems] = useState(initialMenuItems);
   const [categories, setCategories] = useState(initialCategories);
 
@@ -75,6 +73,16 @@ export function ProductTable({ menuItems: initialMenuItems, categories: initialC
     setIsProductFormOpen(true);
   };
 
+  const refreshData = async () => {
+    const [newMenuItems, newCategories] = await Promise.all([
+      getMenuItems(),
+      getCategories(),
+    ]);
+    setMenuItems(newMenuItems);
+    setCategories(newCategories);
+  };
+
+
   const handleDeleteProduct = async (id: number) => {
     const result = await deleteProduct(id);
     if (result.success) {
@@ -82,8 +90,7 @@ export function ProductTable({ menuItems: initialMenuItems, categories: initialC
         title: "موفق",
         description: "محصول با موفقیت حذف شد.",
       });
-      // Refresh the list on the client
-      setMenuItems(prev => prev.filter(item => item.id !== id));
+      await refreshData();
     } else {
       toast({
         variant: "destructive",
@@ -100,7 +107,7 @@ export function ProductTable({ menuItems: initialMenuItems, categories: initialC
         title: "موفق",
         description: "دسته‌بندی با موفقیت حذف شد.",
       });
-      setCategories(prev => prev.filter(cat => cat.id !== id));
+      await refreshData();
     } else {
       toast({
         variant: "destructive",
@@ -110,7 +117,7 @@ export function ProductTable({ menuItems: initialMenuItems, categories: initialC
     }
   }
   
-  const handleSuccess = () => {
+  const handleSuccess = async () => {
     setIsProductFormOpen(false);
     setIsCategoryFormOpen(false);
     setSelectedProduct(null);
@@ -118,11 +125,7 @@ export function ProductTable({ menuItems: initialMenuItems, categories: initialC
         title: "موفق",
         description: "عملیات با موفقیت انجام شد.",
     });
-    // The revalidation will be handled by the server action, 
-    // but a full page reload or state update would be needed here in a real app
-    // For now, the user needs to manually refresh to see cross-page changes.
-    // The dashboard itself will update via state management.
-    window.location.reload(); // Simple solution for prototype
+    await refreshData();
   };
 
 
@@ -295,7 +298,6 @@ export function ProductTable({ menuItems: initialMenuItems, categories: initialC
   );
 }
 
-// We need a separate component for the CardFooter to use the Button from shadcn
 function CardFooter({ children }: { children: React.ReactNode }) {
     return <div className="border-t px-6 py-4">{children}</div>
 }
