@@ -1,7 +1,7 @@
 
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, unstable_noStore as noStore } from "next/cache";
 import { z } from "zod";
 import { menuItems, categories } from "@/lib/data";
 import type { MenuItem } from "@/lib/types";
@@ -10,17 +10,19 @@ import { ai } from "@/ai/genkit";
 // In a real app, you'd be reading this from a database.
 // For this prototype, we'll just use the in-memory data.
 let nextId = Math.max(...menuItems.map(item => item.id)) + 1;
-let nextCatId = categories.length + 1;
 
 export async function getMenuItems() {
+  noStore(); // Opt out of caching
   // Make a copy to avoid mutation issues in dev environments
   return Promise.resolve(JSON.parse(JSON.stringify(menuItems)));
 }
 export async function getCategories() {
+  noStore(); // Opt out of caching
   // Make a copy to avoid mutation issues in dev environments
   return Promise.resolve(JSON.parse(JSON.stringify(categories)));
 }
 export async function getMenuItem(id: number) {
+  noStore(); // Opt out of caching
   return Promise.resolve(menuItems.find((item) => item.id === id));
 }
 
