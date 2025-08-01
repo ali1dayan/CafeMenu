@@ -4,16 +4,20 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { menuItems, categories } from "@/lib/data";
 import type { MenuItem } from "@/lib/types";
+import { ai } from "@/ai/genkit";
 
 // In a real app, you'd be reading this from a database.
 // For this prototype, we'll just use the in-memory data.
 let nextId = Math.max(...menuItems.map(item => item.id)) + 1;
+let nextCatId = categories.length + 1;
 
 export async function getMenuItems() {
-  return Promise.resolve(menuItems);
+  // Make a copy to avoid mutation issues in dev environments
+  return Promise.resolve(JSON.parse(JSON.stringify(menuItems)));
 }
 export async function getCategories() {
-  return Promise.resolve(categories);
+  // Make a copy to avoid mutation issues in dev environments
+  return Promise.resolve(JSON.parse(JSON.stringify(categories)));
 }
 export async function getMenuItem(id: number) {
   return Promise.resolve(menuItems.find((item) => item.id === id));
@@ -122,5 +126,41 @@ export async function addCategory(prevState: unknown, formData: FormData) {
 
   revalidatePath("/dashboard");
   revalidatePath("/menu");
+  revalidatePath("/");
   return { success: true };
+}
+
+export async function deleteCategory(id: string) {
+    const index = categories.findIndex((cat) => cat.id === id);
+    if (index !== -1) {
+        if (menuItems.some(item => item.category === id)) {
+            return { success: false, message: "این دسته‌بندی شامل محصولاتی است و نمی‌توان آن را حذف کرد." };
+        }
+        categories.splice(index, 1);
+        revalidatePath("/dashboard");
+        revalidatePath("/menu");
+        revalidatePath("/");
+        return { success: true };
+    }
+    return { success: false, message: "دسته‌بندی یافت نشد" };
+}
+
+const suggestHintPrompt = ai.definePrompt({
+    name: 'suggestHintPrompt',
+    input: { schema: z.string() },
+    output: { schema: z.string() },
+    prompt: `Based on the product name '{{input}}', suggest one or two English keywords suitable for an image search hint (like for Unsplash). The output should be lowercase and space-separated. For example, for 'کیک شکلاتی', the output could be 'chocolate cake'.`,
+});
+
+export async function suggestAiHint(productName: string) {
+    if (!productName) {
+        return { error: "Product name is required." };
+    }
+    try {
+        const { output } = await suggestHintPrompt(productName);
+        return { hint: output };
+    } catch (e) {
+        console.error(e);
+        return { error: "Failed to generate suggestion." };
+    }
 }

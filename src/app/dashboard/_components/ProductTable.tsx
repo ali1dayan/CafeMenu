@@ -3,7 +3,7 @@
 import { useActionState, useState } from "react";
 import { PlusCircle, MoreHorizontal, Pencil, Trash2, FilePlus, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardActions } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -25,8 +25,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
-  DialogFooter,
 } from "@/components/ui/dialog";
 import {
   AlertDialog,
@@ -42,65 +40,26 @@ import {
 import Image from "next/image";
 
 import { ProductForm } from "./ProductForm";
-import { addCategory, deleteProduct } from "../_actions/products";
+import { CategoryForm } from "./CategoryForm";
+import { deleteProduct, deleteCategory } from "../_actions/products";
 import { useToast } from "@/hooks/use-toast";
 import type { MenuItem } from "@/lib/types";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 
 type ProductTableProps = {
   menuItems: MenuItem[];
   categories: { id: string; name: string }[];
-  onDataChange: () => void;
 };
 
-type CategoryFormState = {
-  errors?: {
-    id?: string[];
-    name?: string[];
-  };
-  success?: boolean;
-} | undefined;
-
-function AddCategoryForm({ onSuccess }: { onSuccess: () => void }) {
-  const [formState, action] = useActionState<CategoryFormState, FormData>(addCategory, undefined);
-  
-  if (formState?.success) {
-    onSuccess();
-  }
-
-  return (
-      <form action={action}>
-        <DialogHeader>
-            <DialogTitle>افزودن دسته‌بندی جدید</DialogTitle>
-            <DialogDescription>
-                یک دسته‌بندی جدید برای محصولات خود ایجاد کنید.
-            </DialogDescription>
-        </DialogHeader>
-        <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="name" className="text-right">نام دسته‌بندی</Label>
-                <Input id="name" name="name" className="col-span-3" />
-                {formState?.errors?.name && <p className="col-span-4 text-sm font-medium text-destructive">{formState.errors.name[0]}</p>}
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="id" className="text-right">آی‌دی انگلیسی</Label>
-                <Input id="id" name="id" placeholder="e.g. new-drinks" className="col-span-3" />
-                {formState?.errors?.id && <p className="col-span-4 text-sm font-medium text-destructive">{formState.errors.id[0]}</p>}
-            </div>
-        </div>
-        <DialogFooter>
-            <Button type="submit">افزودن</Button>
-        </DialogFooter>
-    </form>
-  )
-}
-
-export function ProductTable({ menuItems, categories, onDataChange }: ProductTableProps) {
+export function ProductTable({ menuItems: initialMenuItems, categories: initialCategories }: ProductTableProps) {
   const [isProductFormOpen, setIsProductFormOpen] = useState(false);
   const [isCategoryFormOpen, setIsCategoryFormOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<MenuItem | null>(null);
   const { toast } = useToast();
+
+  // We use state for menuItems and categories to allow for client-side updates after actions
+  const [menuItems, setMenuItems] = useState(initialMenuItems);
+  const [categories, setCategories] = useState(initialCategories);
+
 
   const handleAddProduct = () => {
     setSelectedProduct(null);
@@ -123,7 +82,8 @@ export function ProductTable({ menuItems, categories, onDataChange }: ProductTab
         title: "موفق",
         description: "محصول با موفقیت حذف شد.",
       });
-      onDataChange();
+      // Refresh the list on the client
+      setMenuItems(prev => prev.filter(item => item.id !== id));
     } else {
       toast({
         variant: "destructive",
@@ -132,145 +92,210 @@ export function ProductTable({ menuItems, categories, onDataChange }: ProductTab
       });
     }
   };
+
+  const handleDeleteCategory = async (id: string) => {
+    const result = await deleteCategory(id);
+    if (result.success) {
+      toast({
+        title: "موفق",
+        description: "دسته‌بندی با موفقیت حذف شد.",
+      });
+      setCategories(prev => prev.filter(cat => cat.id !== id));
+    } else {
+      toast({
+        variant: "destructive",
+        title: "خطا",
+        description: result.message || "خطا در حذف دسته‌بندی.",
+      });
+    }
+  }
   
-  const handleProductFormSuccess = () => {
+  const handleSuccess = () => {
     setIsProductFormOpen(false);
+    setIsCategoryFormOpen(false);
     setSelectedProduct(null);
     toast({
         title: "موفق",
-        description: "عملیات محصول با موفقیت انجام شد.",
-      });
-    onDataChange();
+        description: "عملیات با موفقیت انجام شد.",
+    });
+    // The revalidation will be handled by the server action, 
+    // but a full page reload or state update would be needed here in a real app
+    // For now, the user needs to manually refresh to see cross-page changes.
+    // The dashboard itself will update via state management.
+    window.location.reload(); // Simple solution for prototype
   };
 
-  const handleCategoryFormSuccess = () => {
-    setIsCategoryFormOpen(false);
-     toast({
-        title: "موفق",
-        description: "دسته‌بندی جدید اضافه شد.",
-      });
-    onDataChange();
-  }
 
   return (
     <>
       <div className="mb-8 flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">داشبورد محصولات</h1>
+          <h1 className="text-3xl font-bold">داشبورد</h1>
           <p className="text-muted-foreground">
             مدیریت محصولات و دسته‌بندی‌ها
           </p>
         </div>
-        <div className="flex gap-2">
-          <Button onClick={handleAddCategory} variant="outline">
-            <FilePlus className="me-2 h-4 w-4" />
-            افزودن دسته‌بندی
-          </Button>
-          <Button onClick={handleAddProduct}>
-            <PlusCircle className="me-2 h-4 w-4" />
-            افزودن محصول
-          </Button>
+      </div>
+      <div className="grid gap-8 md:grid-cols-3">
+        <div className="md:col-span-2">
+            <Card>
+                <CardHeader>
+                <CardTitle>محصولات</CardTitle>
+                <CardDescription>
+                    در اینجا می‌توانید لیست محصولات خود را مشاهده و مدیریت کنید.
+                </CardDescription>
+                </CardHeader>
+                <CardContent>
+                <Table>
+                    <TableHeader>
+                    <TableRow>
+                        <TableHead className="hidden w-[100px] sm:table-cell">
+                        <span className="sr-only">تصویر</span>
+                        </TableHead>
+                        <TableHead>نام محصول</TableHead>
+                        <TableHead>دسته‌بندی</TableHead>
+                        <TableHead>قیمت</TableHead>
+                        <TableHead>ویژه</TableHead>
+                        <TableHead>
+                        <span className="sr-only">عملیات</span>
+                        </TableHead>
+                    </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                    {menuItems.map((item) => (
+                        <TableRow key={item.id}>
+                        <TableCell className="hidden sm:table-cell">
+                            <Image
+                            alt={item.name}
+                            className="aspect-square rounded-md object-cover"
+                            height="64"
+                            src={item.image || "https://placehold.co/64x64.png"}
+                            width="64"
+                            />
+                        </TableCell>
+                        <TableCell className="font-medium">{item.name}</TableCell>
+                        <TableCell>
+                            {categories.find((c) => c.id === item.category)?.name}
+                        </TableCell>
+                        <TableCell>{item.price.toLocaleString("fa-IR")} تومان</TableCell>
+                        <TableCell>{item.featured ? "بله" : "خیر"}</TableCell>
+                        <TableCell>
+                            <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button aria-haspopup="true" size="icon" variant="ghost">
+                                <MoreHorizontal className="h-4 w-4" />
+                                <span className="sr-only">Toggle menu</span>
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                                <DropdownMenuLabel>عملیات</DropdownMenuLabel>
+                                <DropdownMenuItem onClick={() => handleEditProduct(item)}>
+                                <Pencil className="ms-2 h-4 w-4" />
+                                ویرایش
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                                <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                    <div className="relative flex cursor-pointer select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm text-destructive outline-none transition-colors hover:bg-accent focus:bg-accent data-[disabled]:pointer-events-none data-[disabled]:opacity-50">
+                                        <Trash2 className="ms-2 h-4 w-4" />
+                                        حذف
+                                    </div>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                        <AlertDialogHeader>
+                                            <AlertDialogTitle>آیا مطمئن هستید؟</AlertDialogTitle>
+                                            <AlertDialogDescription>
+                                            این عمل قابل بازگشت نیست. این محصول برای همیشه حذف خواهد شد.
+                                            </AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                            <AlertDialogCancel>انصراف</AlertDialogCancel>
+                                            <AlertDialogAction onClick={() => handleDeleteProduct(item.id)}>
+                                            بله، حذف کن
+                                            </AlertDialogAction>
+                                        </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                </AlertDialog>
+                            </DropdownMenuContent>
+                            </DropdownMenu>
+                        </TableCell>
+                        </TableRow>
+                    ))}
+                    </TableBody>
+                </Table>
+                </CardContent>
+                <CardFooter>
+                    <Button onClick={handleAddProduct}>
+                        <PlusCircle className="me-2 h-4 w-4" />
+                        افزودن محصول جدید
+                    </Button>
+                </CardFooter>
+            </Card>
+        </div>
+        <div className="md:col-span-1">
+             <Card>
+                <CardHeader>
+                <CardTitle>دسته‌بندی‌ها</CardTitle>
+                <CardDescription>
+                    دسته‌بندی‌های موجود را مدیریت کنید.
+                </CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <div className="space-y-2">
+                        {categories.map((cat) => (
+                            <div key={cat.id} className="flex items-center justify-between rounded-md border p-3">
+                                <span>{cat.name}</span>
+                                 <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                        <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive">
+                                            <Trash2 className="h-4 w-4" />
+                                        </Button>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                        <AlertDialogHeader>
+                                            <AlertDialogTitle>حذف دسته‌بندی</AlertDialogTitle>
+                                            <AlertDialogDescription>
+                                            آیا از حذف دسته‌بندی "{cat.name}" مطمئن هستید؟ این عمل قابل بازگشت نیست.
+                                            </AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                            <AlertDialogCancel>انصراف</AlertDialogCancel>
+                                            <AlertDialogAction onClick={() => handleDeleteCategory(cat.id)}>
+                                            بله، حذف کن
+                                            </AlertDialogAction>
+                                        </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                </AlertDialog>
+                            </div>
+                        ))}
+                    </div>
+                </CardContent>
+                <CardFooter>
+                     <Button onClick={handleAddCategory} className="w-full">
+                        <FilePlus className="me-2 h-4 w-4" />
+                        افزودن دسته‌بندی
+                    </Button>
+                </CardFooter>
+            </Card>
         </div>
       </div>
-      <Card>
-        <CardHeader>
-          <CardTitle>محصولات</CardTitle>
-          <CardDescription>
-            در اینجا می‌توانید لیست محصولات خود را مشاهده و مدیریت کنید.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="hidden w-[100px] sm:table-cell">
-                  <span className="sr-only">تصویر</span>
-                </TableHead>
-                <TableHead>نام محصول</TableHead>
-                <TableHead>دسته‌بندی</TableHead>
-                <TableHead>قیمت</TableHead>
-                <TableHead>ویژه</TableHead>
-                <TableHead>
-                  <span className="sr-only">عملیات</span>
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {menuItems.map((item) => (
-                <TableRow key={item.id}>
-                  <TableCell className="hidden sm:table-cell">
-                    <Image
-                      alt={item.name}
-                      className="aspect-square rounded-md object-cover"
-                      height="64"
-                      src={item.image || "https://placehold.co/64x64.png"}
-                      width="64"
-                    />
-                  </TableCell>
-                  <TableCell className="font-medium">{item.name}</TableCell>
-                  <TableCell>
-                    {categories.find((c) => c.id === item.category)?.name}
-                  </TableCell>
-                  <TableCell>{item.price.toLocaleString("fa-IR")} تومان</TableCell>
-                  <TableCell>{item.featured ? "بله" : "خیر"}</TableCell>
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button aria-haspopup="true" size="icon" variant="ghost">
-                          <MoreHorizontal className="h-4 w-4" />
-                          <span className="sr-only">Toggle menu</span>
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>عملیات</DropdownMenuLabel>
-                        <DropdownMenuItem onClick={() => handleEditProduct(item)}>
-                          <Pencil className="ms-2 h-4 w-4" />
-                          ویرایش
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                         <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                               <div className="relative flex cursor-pointer select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm text-destructive outline-none transition-colors hover:bg-accent focus:bg-accent data-[disabled]:pointer-events-none data-[disabled]:opacity-50">
-                                <Trash2 className="ms-2 h-4 w-4" />
-                                حذف
-                               </div>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                                <AlertDialogHeader>
-                                    <AlertDialogTitle>آیا مطمئن هستید؟</AlertDialogTitle>
-                                    <AlertDialogDescription>
-                                    این عمل قابل بازگشت نیست. این محصول برای همیشه حذف خواهد شد.
-                                    </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                    <AlertDialogCancel>انصراف</AlertDialogCancel>
-                                    <AlertDialogAction onClick={() => handleDeleteProduct(item.id)}>
-                                    بله، حذف کن
-                                    </AlertDialogAction>
-                                </AlertDialogFooter>
-                            </AlertDialogContent>
-                        </AlertDialog>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
 
       <Dialog open={isProductFormOpen} onOpenChange={setIsProductFormOpen}>
         <DialogContent className="sm:max-w-[725px]">
-            <ProductForm product={selectedProduct} categories={categories} onSuccess={handleProductFormSuccess} />
+            <ProductForm product={selectedProduct} categories={categories} onSuccess={handleSuccess} />
         </DialogContent>
       </Dialog>
 
       <Dialog open={isCategoryFormOpen} onOpenChange={setIsCategoryFormOpen}>
           <DialogContent className="sm:max-w-[425px]">
-              <AddCategoryForm onSuccess={handleCategoryFormSuccess} />
+              <CategoryForm onSuccess={handleSuccess} />
           </DialogContent>
       </Dialog>
     </>
   );
+}
+
+// We need a separate component for the CardFooter to use the Button from shadcn
+function CardFooter({ children }: { children: React.ReactNode }) {
+    return <div className="border-t px-6 py-4">{children}</div>
 }

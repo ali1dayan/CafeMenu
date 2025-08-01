@@ -1,9 +1,9 @@
-import NextAuth from "next-auth";
-import { authConfig } from "./auth.config";
-
+import { authConfig } from './auth.config';
+import NextAuth from 'next-auth';
+ 
 export default NextAuth(authConfig).auth;
-
-// The matcher is updated to protect all dashboard routes, including the root.
+ 
 export const config = {
-  matcher: ["/dashboard/:path*"],
+  // https://nextjs.org/docs/app/building-your-application/routing/middleware#matcher
+  matcher: ['/((?!api|_next/static|_next/image|.*\\.png$).*)'],
 };

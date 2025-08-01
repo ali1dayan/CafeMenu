@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useState, useRef } from "react";
+import { useActionState, useEffect, useState, useRef, useTransition } from "react";
 import { useFormStatus } from "react-dom";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -15,10 +15,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { saveProduct } from "../_actions/products";
+import { saveProduct, suggestAiHint } from "../_actions/products";
 import type { MenuItem } from "@/lib/types";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { AlertCircle, Upload } from "lucide-react";
+import { AlertCircle, Upload, Sparkles } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 
@@ -43,6 +43,10 @@ export function ProductForm({ product, categories, onSuccess }: ProductFormProps
   const [formState, action] = useActionState<FormState, FormData>(saveProduct, undefined);
   const [imagePreview, setImagePreview] = useState<string | null>(product?.image || null);
   const formRef = useRef<HTMLFormElement>(null);
+  const [isPending, startTransition] = useTransition();
+
+  const [aiHint, setAiHint] = useState(product?.aiHint || '');
+  const [productName, setProductName] = useState(product?.name || '');
 
 
   useEffect(() => {
@@ -60,6 +64,15 @@ export function ProductForm({ product, categories, onSuccess }: ProductFormProps
       };
       reader.readAsDataURL(file);
     }
+  };
+  
+  const handleSuggestHint = () => {
+    startTransition(async () => {
+        const result = await suggestAiHint(productName);
+        if (result.hint) {
+            setAiHint(result.hint);
+        }
+    });
   };
 
 
@@ -98,7 +111,7 @@ export function ProductForm({ product, categories, onSuccess }: ProductFormProps
             <div className="md:col-span-2 space-y-4">
                 <div className="space-y-2">
                     <Label htmlFor="name">نام محصول</Label>
-                    <Input id="name" name="name" defaultValue={product?.name} />
+                    <Input id="name" name="name" defaultValue={product?.name} onChange={(e) => setProductName(e.target.value)} />
                     {formState?.errors?.name && <FormError message={formState.errors.name[0]} />}
                 </div>
                 <div className="space-y-2">
@@ -135,7 +148,13 @@ export function ProductForm({ product, categories, onSuccess }: ProductFormProps
           </div>
            <div className="space-y-2">
             <Label htmlFor="aiHint">راهنمای هوش مصنوعی (اختیاری)</Label>
-            <Input id="aiHint" name="aiHint" defaultValue={product?.aiHint || ''} placeholder="مثال: kebab platter"/>
+            <div className="flex gap-2">
+                <Input id="aiHint" name="aiHint" value={aiHint} onChange={(e) => setAiHint(e.target.value)} placeholder="مثال: kebab platter"/>
+                <Button type="button" variant="outline" onClick={handleSuggestHint} disabled={isPending || !productName}>
+                    {isPending ? "..." : <Sparkles className="h-4 w-4" />}
+                    <span className="hidden sm:inline ms-2">پیشنهاد</span>
+                </Button>
+            </div>
             <p className="text-xs text-muted-foreground">یک یا دو کلمه انگلیسی برای کمک به پیدا کردن تصویر مناسب توسط هوش مصنوعی.</p>
           </div>
 
