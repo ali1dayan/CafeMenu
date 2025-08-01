@@ -24,9 +24,6 @@ import {
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
 } from "@/components/ui/dialog";
 import {
   AlertDialog,
@@ -142,8 +139,8 @@ export function ProductTable({ menuItems: initialMenuItems, categories: initialC
           </p>
         </div>
       </div>
-      <div className="grid gap-8 md:grid-cols-3">
-        <div className="md:col-span-2">
+      <div className="grid gap-8 lg:grid-cols-3">
+        <div className="lg:col-span-2">
             <Card>
                 <CardHeader>
                 <CardTitle>محصولات</CardTitle>
@@ -159,9 +156,9 @@ export function ProductTable({ menuItems: initialMenuItems, categories: initialC
                         <span className="sr-only">تصویر</span>
                         </TableHead>
                         <TableHead>نام محصول</TableHead>
-                        <TableHead>دسته‌بندی</TableHead>
-                        <TableHead>قیمت</TableHead>
-                        <TableHead>ویژه</TableHead>
+                        <TableHead className="hidden md:table-cell">دسته‌بندی</TableHead>
+                        <TableHead className="hidden md:table-cell">قیمت</TableHead>
+                        <TableHead className="hidden sm:table-cell">ویژه</TableHead>
                         <TableHead>
                         <span className="sr-only">عملیات</span>
                         </TableHead>
@@ -180,11 +177,11 @@ export function ProductTable({ menuItems: initialMenuItems, categories: initialC
                             />
                         </TableCell>
                         <TableCell className="font-medium">{item.name}</TableCell>
-                        <TableCell>
+                        <TableCell className="hidden md:table-cell">
                             {categories.find((c) => c.id === item.category)?.name}
                         </TableCell>
-                        <TableCell>{item.price.toLocaleString("fa-IR")} تومان</TableCell>
-                        <TableCell>{item.featured ? "بله" : "خیر"}</TableCell>
+                        <TableCell className="hidden md:table-cell">{item.price.toLocaleString("fa-IR")} تومان</TableCell>
+                        <TableCell className="hidden sm:table-cell">{item.featured ? "بله" : "خیر"}</TableCell>
                         <TableCell>
                             <DropdownMenu>
                             <DropdownMenuTrigger asChild>
@@ -238,7 +235,7 @@ export function ProductTable({ menuItems: initialMenuItems, categories: initialC
                 </CardFooter>
             </Card>
         </div>
-        <div className="md:col-span-1">
+        <div className="lg:col-span-1">
              <Card>
                 <CardHeader>
                 <CardTitle>دسته‌بندی‌ها</CardTitle>
@@ -250,7 +247,7 @@ export function ProductTable({ menuItems: initialMenuItems, categories: initialC
                     <div className="space-y-2">
                         {categories.map((cat) => (
                             <div key={cat.id} className="flex items-center justify-between rounded-md border p-3">
-                                <span>{cat.name}</span>
+                                <span className="text-sm font-medium">{cat.name}</span>
                                  <AlertDialog>
                                     <AlertDialogTrigger asChild>
                                         <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive">
@@ -288,13 +285,7 @@ export function ProductTable({ menuItems: initialMenuItems, categories: initialC
 
       <Dialog open={isProductFormOpen} onOpenChange={setIsProductFormOpen}>
         <DialogContent className="sm:max-w-[725px]">
-            <DialogHeader>
-                <DialogTitle>{selectedProduct ? "ویرایش محصول" : "افزودن محصول جدید"}</DialogTitle>
-                <DialogDescription>
-                    {selectedProduct ? "مشخصات محصول را تغییر دهید." : "محصول جدیدی به منوی خود اضافه کنید."}
-                </DialogDescription>
-            </DialogHeader>
-            <ProductForm product={selectedProduct} categories={categories} onSuccess={handleSuccess} />
+          <ProductForm product={selectedProduct} categories={categories} onSuccess={handleSuccess} />
         </DialogContent>
       </Dialog>
 
