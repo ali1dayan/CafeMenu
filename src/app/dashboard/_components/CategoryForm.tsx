@@ -5,7 +5,7 @@ import { useFormStatus } from "react-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { DialogFooter } from "@/components/ui/dialog";
 import { addCategory } from "../_actions/products";
 
 type CategoryFormProps = {
@@ -33,12 +33,6 @@ export function CategoryForm({ onSuccess }: CategoryFormProps) {
 
   return (
     <form ref={formRef} action={action}>
-      <DialogHeader>
-        <DialogTitle>افزودن دسته‌بندی جدید</DialogTitle>
-        <DialogDescription>
-          یک دسته‌بندی جدید برای محصولات خود ایجاد کنید.
-        </DialogDescription>
-      </DialogHeader>
       <div className="grid gap-4 py-4">
         <div className="space-y-2">
             <Label htmlFor="name">نام دسته‌بندی</Label>

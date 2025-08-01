@@ -304,7 +304,13 @@ export function ProductTable({ menuItems: initialMenuItems, categories: initialC
 
       <Dialog open={isCategoryFormOpen} onOpenChange={setIsCategoryFormOpen}>
           <DialogContent className="sm:max-w-[425px]">
-              <CategoryForm onSuccess={handleSuccess} />
+            <DialogHeader>
+                <DialogTitle>افزودن دسته‌بندی جدید</DialogTitle>
+                <DialogDescription>
+                  یک دسته‌بندی جدید برای محصولات خود ایجاد کنید.
+                </DialogDescription>
+            </DialogHeader>
+            <CategoryForm onSuccess={handleSuccess} />
           </DialogContent>
       </Dialog>
     </>
