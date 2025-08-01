@@ -6,8 +6,8 @@ import { z } from 'zod';
 // In a real-world application, you would fetch user data from a database.
 // For this prototype, we'll use a hardcoded user.
 async function getUser(username: string): Promise<{ name: string } | undefined> {
-  if (username === 'admin') {
-    return { name: 'Admin' };
+  if (username === 'user') {
+    return { name: 'User' };
   }
   return undefined;
 }
@@ -25,8 +25,8 @@ export const { auth, signIn, signOut } = NextAuth({
           const { username, password } = parsedCredentials.data;
 
           // Hardcoded credentials for this prototype
-          const expectedUsername = 'admin';
-          const expectedPassword = 'password';
+          const expectedUsername = 'user';
+          const expectedPassword = 'test1password';
 
           const user = await getUser(username);
           if (!user) {
