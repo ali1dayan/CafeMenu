@@ -1,12 +1,35 @@
 "use client"
 
+import { useEffect, useState } from 'react';
 import { ProductTable } from "./_components/ProductTable";
 import { getMenuItems, getCategories } from "./_actions/products";
+import type { MenuItem } from '@/lib/types';
 
+export default function Dashboard() {
+  const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
+  const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
+  const [loading, setLoading] = useState(true);
 
-export default async function Dashboard() {
-  const menuItems = await getMenuItems();
-  const categories = await getCategories();
+  useEffect(() => {
+    async function fetchData() {
+      const [items, cats] = await Promise.all([
+        getMenuItems(),
+        getCategories(),
+      ]);
+      setMenuItems(items);
+      setCategories(cats);
+      setLoading(false);
+    }
+    fetchData();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="container mx-auto py-10">
+        <p>در حال بارگذاری...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto py-10">
