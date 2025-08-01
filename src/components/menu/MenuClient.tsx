@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import Image from 'next/image';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -15,19 +15,38 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel"
 import { motion } from "framer-motion";
+import { getCategories, getMenuItems } from '@/app/dashboard/_actions/products';
+import { Skeleton } from '../ui/skeleton';
 
 
-interface MenuClientProps {
-  initialMenuItems: MenuItem[];
-  initialCategories: { id: string; name: string }[];
-}
-
-export function MenuClient({ initialMenuItems, initialCategories }: MenuClientProps) {
+export function MenuClient() {
+  const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
+  const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
+  useEffect(() => {
+    async function fetchData() {
+        try {
+            setLoading(true);
+            const [fetchedItems, fetchedCategories] = await Promise.all([
+                getMenuItems(),
+                getCategories()
+            ]);
+            setMenuItems(fetchedItems);
+            setCategories(fetchedCategories);
+        } catch (error) {
+            console.error("Failed to fetch menu data:", error);
+        } finally {
+            setLoading(false);
+        }
+    }
+    fetchData();
+  }, [])
+
   const filteredMenuItems = useMemo(() => {
-    let items = initialMenuItems;
+    let items = menuItems;
     
     if (searchTerm) {
       items = items.filter(item => 
@@ -41,7 +60,7 @@ export function MenuClient({ initialMenuItems, initialCategories }: MenuClientPr
     }
 
     return items;
-  }, [searchTerm, selectedCategory, initialMenuItems]);
+  }, [searchTerm, selectedCategory, menuItems]);
   
   const handleCategorySelect = useCallback((categoryId: string) => {
     setSelectedCategory(categoryId);
@@ -97,7 +116,7 @@ export function MenuClient({ initialMenuItems, initialCategories }: MenuClientPr
                         همه
                     </Button>
                 </CarouselItem>
-                {initialCategories.map(cat => (
+                {categories.map(cat => (
                  <CarouselItem key={cat.id} className="basis-auto pl-2">
                     <Button 
                         variant={selectedCategory === cat.id ? 'default' : 'outline'}
@@ -118,7 +137,29 @@ export function MenuClient({ initialMenuItems, initialCategories }: MenuClientPr
          layout
          className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 lg:gap-8"
        >
-            {filteredMenuItems.map((item, index) => (
+            {loading ? (
+                Array.from({ length: 8 }).map((_, index) => (
+                    <motion.div
+                        key={index}
+                        layout
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                    >
+                        <Card className="overflow-hidden h-full flex flex-col">
+                            <Skeleton className="aspect-video w-full" />
+                            <CardContent className="p-4 flex flex-col flex-grow">
+                                <Skeleton className="h-5 w-3/4 mb-2" />
+                                <Skeleton className="h-4 w-full mb-4" />
+                                <Skeleton className="h-4 w-1/2" />
+                                <div className="mt-4 flex items-center justify-between">
+                                    <Skeleton className="h-6 w-1/3" />
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </motion.div>
+                ))
+            ) : filteredMenuItems.map((item, index) => (
                 <motion.div
                     key={item.id}
                     layout
@@ -148,7 +189,7 @@ export function MenuClient({ initialMenuItems, initialCategories }: MenuClientPr
             ))}
         </motion.div>
 
-       {filteredMenuItems.length === 0 && (
+       {!loading && filteredMenuItems.length === 0 && (
           <div className="text-center py-16">
             <p className="text-xl text-muted-foreground">هیچ موردی با جستجوی شما یافت نشد.</p>
           </div>
