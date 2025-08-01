@@ -3,7 +3,7 @@ import { UtensilsCrossed, Twitter, Instagram, Facebook } from 'lucide-react';
 
 export function Footer() {
   return (
-    <footer className="border-t bg-card">
+    <footer className="bg-background/30 backdrop-blur-xl border-t border-border/20 mt-16">
       <div className="container mx-auto px-4 py-8">
         <div className="flex flex-col items-center justify-between gap-8 md:flex-row">
           <div className="flex flex-col items-center md:items-start">
@@ -27,7 +27,7 @@ export function Footer() {
             </Link>
           </div>
         </div>
-        <div className="mt-8 border-t pt-4 text-center text-sm text-muted-foreground">
+        <div className="mt-8 border-t border-border/20 pt-4 text-center text-sm text-muted-foreground">
           <p>&copy; {new Date().getFullYear()} کافه رستوران طعم پارسی. تمامی حقوق محفوظ است.</p>
         </div>
       </div>
