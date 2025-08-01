@@ -141,7 +141,6 @@ export function MenuClient({ initialMenuItems, initialCategories }: MenuClientPr
                             <p className="mt-2 text-sm text-muted-foreground flex-grow">{item.description}</p>
                             <div className="mt-4 flex items-center justify-between">
                                 <span className="text-lg font-semibold">{item.price.toLocaleString('fa-IR')} تومان</span>
-                                <Button size="sm">سفارش</Button>
                             </div>
                         </CardContent>
                     </Card>

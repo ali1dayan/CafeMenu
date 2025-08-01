@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetHeader } from '@/components/ui/sheet';
 import { Menu, Utensils } from 'lucide-react';
 import { ThemeToggle } from '../theme-toggle';
 
@@ -48,11 +48,13 @@ export function Header() {
                         </Button>
                     </SheetTrigger>
                     <SheetContent side="right">
-                        <div className="grid gap-4 py-6">
-                            <Link href="/" className="flex items-center gap-2 font-bold">
+                        <SheetHeader>
+                            <SheetTitle className="flex items-center gap-2">
                                 <Utensils className="h-6 w-6" />
                                 <span>طعم پارسی</span>
-                            </Link>
+                            </SheetTitle>
+                        </SheetHeader>
+                        <div className="grid gap-4 py-6">
                             <nav className="grid gap-2">
                             {navLinks.map((link) => (
                                 <Link

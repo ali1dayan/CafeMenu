@@ -71,9 +71,6 @@ export default async function Home() {
                     <p className="mt-2 text-sm text-muted-foreground">{item.description}</p>
                     <div className="mt-4 flex items-center justify-between">
                         <span className="text-lg font-semibold">{item.price.toLocaleString('fa-IR')} تومان</span>
-                        <Button asChild variant="outline">
-                           <Link href="/menu">سفارش</Link>
-                        </Button>
                     </div>
                   </CardContent>
                 </Card>
