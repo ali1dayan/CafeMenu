@@ -4,7 +4,7 @@
 import { useActionState, useState } from "react";
 import { PlusCircle, MoreHorizontal, Pencil, Trash2, FilePlus, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -24,6 +24,9 @@ import {
 import {
   Dialog,
   DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import {
   AlertDialog,
@@ -285,6 +288,12 @@ export function ProductTable({ menuItems: initialMenuItems, categories: initialC
 
       <Dialog open={isProductFormOpen} onOpenChange={setIsProductFormOpen}>
         <DialogContent className="sm:max-w-[725px]">
+            <DialogHeader>
+                <DialogTitle>{selectedProduct ? "ویرایش محصول" : "افزودن محصول جدید"}</DialogTitle>
+                <DialogDescription>
+                    {selectedProduct ? "مشخصات محصول را تغییر دهید." : "محصول جدیدی به منوی خود اضافه کنید."}
+                </DialogDescription>
+            </DialogHeader>
             <ProductForm product={selectedProduct} categories={categories} onSuccess={handleSuccess} />
         </DialogContent>
       </Dialog>
@@ -296,8 +305,4 @@ export function ProductTable({ menuItems: initialMenuItems, categories: initialC
       </Dialog>
     </>
   );
-}
-
-function CardFooter({ children }: { children: React.ReactNode }) {
-    return <div className="border-t px-6 py-4">{children}</div>
 }

@@ -92,7 +92,13 @@ export function ProductForm({ product, categories, onSuccess }: ProductFormProps
               <Label htmlFor="imageFile">تصویر محصول</Label>
                <div className="relative w-full aspect-square border-dashed border-2 rounded-md flex items-center justify-center text-muted-foreground">
                  {imagePreview ? (
-                    <Image src={imagePreview} alt="Product preview" layout="fill" objectFit="cover" className="rounded-md"/>
+                    <Image 
+                      src={imagePreview} 
+                      alt="Product preview" 
+                      fill
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                      className="rounded-md object-cover"
+                    />
                  ) : (
                     <div className="text-center">
                         <Upload className="mx-auto h-8 w-8"/>
