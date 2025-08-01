@@ -11,20 +11,15 @@ export const authConfig = {
       const isOnDashboard = nextUrl.pathname.startsWith("/dashboard");
 
       if (isOnDashboard) {
-        if (isLoggedIn) {
-            // If the user is logged in and tries to access the login page, redirect them to the dashboard
-            if (nextUrl.pathname === "/dashboard/login") {
-                return Response.redirect(new URL("/dashboard", nextUrl));
-            }
-            return true; // Allow access to other dashboard pages
-        }
-        return false; // Redirect unauthenticated users to the login page
+        if (isLoggedIn) return true;
+        return false; // Redirect unauthenticated users to login page
       } else if (isLoggedIn) {
-        // Allow logged-in users to access non-dashboard pages
+        // If the user is logged in and tries to access the login page, redirect them to the dashboard
+        if (nextUrl.pathname === "/dashboard/login") {
+            return Response.redirect(new URL("/dashboard", nextUrl));
+        }
         return true;
       }
-      
-      // Allow unauthenticated users to access non-dashboard pages
       return true;
     },
   },
