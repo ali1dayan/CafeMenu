@@ -14,7 +14,7 @@ export function Footer() {
           <Link href="/contact" className="text-sm hover:underline underline-offset-4">
             تماس با ما
           </Link>
-          <Link href="/dashboard/login" className="text-sm hover:underline underline-offset-4">
+          <Link href="https://studio-cafemenu.vercel.app/" className="text-sm hover:underline underline-offset-4">
             ورود مدیر
           </Link>
         </nav>

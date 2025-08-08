@@ -2,16 +2,22 @@
 
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
-import { authenticate } from "@/app/dashboard/_actions/auth";
+// import { authenticate } from "@/app/dashboard/_actions/auth";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 
 export default function LoginPage() {
-  const [errorMessage, dispatch] = useActionState(authenticate, undefined);
+  // const [errorMessage, dispatch] = useActionState(authenticate, undefined);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background">
@@ -23,7 +29,7 @@ export default function LoginPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form action={dispatch} className="space-y-4">
+          {/* <form action={dispatch} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="username">نام کاربری</Label>
               <Input
@@ -47,7 +53,7 @@ export default function LoginPage() {
               </Alert>
             )}
             <LoginButton />
-          </form>
+          </form> */}
         </CardContent>
       </Card>
     </div>

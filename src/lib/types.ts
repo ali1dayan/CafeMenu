@@ -1,4 +1,4 @@
-export type Category = 'hot-drinks' | 'cold-drinks' | 'meals' | 'desserts';
+export type Category = "hot-drinks" | "cold-drinks" | "meals" | "desserts";
 
 export interface MenuItem {
   id: number;
@@ -7,6 +7,6 @@ export interface MenuItem {
   price: number;
   image: string;
   category: Category;
-  featured?: boolean;
   aiHint?: string;
+  isSpecial?: boolean;
 }

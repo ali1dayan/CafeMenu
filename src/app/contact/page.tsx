@@ -2,6 +2,7 @@ import Image from 'next/image';
 import { Phone, Mail, MapPin } from 'lucide-react';
 
 export default function ContactPage() {
+
   return (
     <div className="container mx-auto px-4 py-16">
       <div className="text-center">
