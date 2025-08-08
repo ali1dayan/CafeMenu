@@ -32,7 +32,6 @@ export async function getCategories() {
     }
 
     const data = await res.json();
-
     return data.map((cat: any) => ({
       id: cat.titleEn,
       name: cat.titleFa,
