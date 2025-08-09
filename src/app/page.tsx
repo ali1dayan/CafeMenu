@@ -1,13 +1,69 @@
+import { headers } from "next/headers";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { getMenuItems } from "@/app/dashboard/_actions/products";
 import { ArrowLeft, Utensils, Award } from "lucide-react";
 
-export default async function Home() {
-  const allItems = await getMenuItems();
-  const featuredItems = allItems.filter((item : any) => item.isSpecial);
+type MenuItemRaw = {
+  _id: string;
+  title: string;
+  price?: number;
+  description?: string;
+  imageUrl?: string;
+  isSpecial?: boolean;
+  category?: { titleEn?: string; titleFa?: string } | null;
+};
+
+type MenuItem = {
+  id: string;
+  name: string;
+  price: number;
+  description: string;
+  image: string;
+  isSpecial: boolean;
+  category?: string | null;
+};
+
+export default async function Home(): Promise<JSX.Element> {
+  const headersList = await headers();
+  const host = headersList.get("host");
+  const protocol = process.env.NODE_ENV === "production" ? "https" : "http";
+  const baseUrl = `${protocol}://${host}`;
+
+  let allItems: MenuItem[] = [];
+
+  try {
+    const res = await fetch(`${baseUrl}/api/menu`, {
+      cache: "no-store",
+    });
+
+    if (!res.ok) {
+      const text = await res.text().catch(() => "");
+      console.error(
+        `Failed to fetch /api/menu — status: ${res.status} body: ${text}`
+      );
+    } else {
+      const data = (await res.json()) as MenuItemRaw[] | null;
+      if (Array.isArray(data)) {
+        allItems = data.map((item) => ({
+          id: item._id,
+          name: item.title,
+          price: typeof item.price === "number" ? item.price : 0,
+          description: item.description ?? "",
+          image: item.imageUrl ?? "/placeholder-400x225.png",
+          isSpecial: !!item.isSpecial,
+          category: item.category?.titleEn ?? null,
+        }));
+      } else {
+        console.warn("Received non-array from /api/menu:", data);
+      }
+    }
+  } catch (err) {
+    console.error("Error fetching menu items:", err);
+  }
+
+  const featuredItems = allItems.filter((item) => item.isSpecial);
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -58,29 +114,38 @@ export default async function Home() {
               </p>
             </div>
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:gap-8">
-              {featuredItems.map((item : any) => (
-                <Card key={item.id} className="overflow-hidden glassmorphism">
-                  <Image
-                    src={item.image}
-                    alt={item.name}
-                    width={400}
-                    height={225}
-                    className="aspect-video w-full object-cover"
-                    data-ai-hint={item.aiHint}
-                  />
-                  <CardContent className="p-4">
-                    <h3 className="text-lg font-bold">{item.name}</h3>
-                    <p className="mt-2 text-sm text-muted-foreground">
-                      {item.description}
-                    </p>
-                    <div className="mt-4 flex items-center justify-between">
-                      <span className="text-lg font-semibold">
-                        {item.price.toLocaleString("fa-IR")} تومان
-                      </span>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+              {featuredItems.length === 0 ? (
+                <div className="col-span-full text-center text-muted-foreground">
+                  پیشنهادی ثبت نشده است.
+                </div>
+              ) : (
+                featuredItems.map((item) => (
+                  <Card key={item.id} className="overflow-hidden glassmorphism">
+                    <Image
+                      src={item.image}
+                      alt={item.name}
+                      width={400}
+                      height={225}
+                      className="aspect-video w-full object-cover"
+                      data-ai-hint={item.name}
+                    />
+                    <CardContent className="p-4">
+                      <h3 className="text-lg font-bold">{item.name}</h3>
+                      <p className="mt-2 text-sm text-muted-foreground">
+                        {item.description}
+                      </p>
+                      <div className="mt-4 flex items-center justify-between">
+                        <span className="text-lg font-semibold">
+                          {Number.isFinite(item.price)
+                            ? item.price.toLocaleString("fa-IR")
+                            : "—"}{" "}
+                          تومان
+                        </span>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))
+              )}
             </div>
             <div className="mt-12 text-center">
               <Button asChild>

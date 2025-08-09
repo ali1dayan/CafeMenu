@@ -46,7 +46,6 @@ export function MenuClient() {
     fetchData();
     
   }, []);
-console.log(menuItems)
   const filteredMenuItems = useMemo(() => {
     let items = menuItems;
 

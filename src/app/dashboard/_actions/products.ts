@@ -1,9 +1,12 @@
 export async function getMenuItems() {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/menu`);
-    if (!res.ok) {
-      throw new Error(`HTTP ${res.status}: ${await res.text()}`);
-    }
+    const baseUrl =
+      typeof window === "undefined"
+        ? process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
+        : "";
+
+    const res = await fetch(`${baseUrl}/api/menu`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}: ${await res.text()}`);
 
     const data = await res.json();
     return data.map((item: any) => ({
@@ -23,13 +26,13 @@ export async function getMenuItems() {
 
 export async function getCategories() {
   try {
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_SITE_URL}/api/categories`
-    );
+    const baseUrl =
+      typeof window === "undefined"
+        ? process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
+        : "";
 
-    if (!res.ok) {
-      throw new Error(`HTTP ${res.status}: ${await res.text()}`);
-    }
+    const res = await fetch(`${baseUrl}/api/categories`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}: ${await res.text()}`);
 
     const data = await res.json();
     return data.map((cat: any) => ({
